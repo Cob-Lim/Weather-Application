@@ -1,7 +1,9 @@
 from dotenv import load_dotenv
 import os
 import httpx
+from datetime import datetime, timezone, timedelta
 
+# Change the path to your .env file as needed
 load_dotenv(r"C:\Users\User\Documents\Miscellaneous\Coding Projects\Weather-Application\backend\weather_api.env", override = True)
 
 API_KEY = os.getenv("OPENWEATHER_API_KEY")
@@ -50,8 +52,10 @@ try:
 
     print(f"Coordinates Data: {coordinates_data}")
     print(f"Place: {coordinates_data[0]['name']}, Latitude: {coordinates_data[0]['lat']}, Longitude: {coordinates_data[0]['lon']}")
+
 except httpx.HTTPError as http_err:
     print(f"HTTP error occurred: {http_err}")
+
 except Exception as err:
     print(f"An error occurred: {err}")
 
@@ -71,6 +75,23 @@ weather_params = {
     "units": "metric"  # For the temperature to be displayed in Celsius
 }
 
+
+# Function to get local time based on timezone offset in seconds (according to OpenWeather API)
+def get_local_time(shift_in_seconds):
+
+    # Create a UTC offset object using the seconds from the API
+    offset = timedelta(seconds = shift_in_seconds)
+    tz_info = timezone(offset)
+    
+    # Get the current time in UTC, then apply the offset
+    now_utc = datetime.now(timezone.utc)
+    local_time = now_utc.astimezone(tz_info)
+
+    # Change to desired format
+    formatted_date_time = local_time.strftime("%A, %B %d, %Y | %I:%M %p")
+
+    return formatted_date_time
+
 # Check if params are as intended
 print(f"Weather API Params: {weather_params}")
 
@@ -87,7 +108,13 @@ try:
 
     print(f"Weather Data: {weather_data}")
     print(f"Current Temperature (in Celsius) in {weather_data['name']}: {weather_data['main']['temp']}°C but feels like {weather_data['main']['feels_like']}°C")
+
+    # Get the local time
+    current_local = get_local_time(weather_data['timezone'])
+    print(f"Day, Date, and Time at {weather_data['name']}: {current_local}")
+
 except httpx.HTTPError as http_err:
     print(f"HTTP error occurred: {http_err}")
+
 except Exception as err:
     print(f"An error occurred: {err}")
