@@ -1,0 +1,5 @@
+# Python libraries to install
+fastapi
+uvicorn
+httpx
+python-dotenv
